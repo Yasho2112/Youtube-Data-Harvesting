@@ -29,8 +29,8 @@ Once we retrieved the data from the YouTube API, store it in a suitable format f
 After we've collected data for multiple channels, you can migrate it to a SQL data warehouse. You can use a SQL database such as MySQL or SQLworkbench for this.
 
 **5.Query the SQL data warehouse:**
-we can use SQL queries to join the tables in the SQL data warehouse and retrieve data for specific channels based on user input. You can use a Python SQL library such as SQLAlchemy to interact with the SQL database.
+we can use SQL queries to join the tables in the SQL data warehouse and retrieve data for specific channels based on user input.
 
 **6.Display data in the Streamlit app:**
-Finally, you can display the retrieved data in the Streamlit app. You can use Streamlit's data visualization features to create charts and graphs to help users analyze the data.
+Finally, we can display the retrieved data in the Streamlit app. we can use Streamlit's data visualization features to create charts and graphs to help users analyze the data.
  
