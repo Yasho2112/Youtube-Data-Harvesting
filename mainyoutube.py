@@ -20,6 +20,9 @@ st.set_page_config(layout="wide")
 st.title(":green[YOUTUBE DATA HARVESTING AND WAREHOUSING]")
 channel_id=st.text_input("***Enter the channel ID***")
 ins=st.button("Insert")
+#if channel_id and ins:
+#     st.write(channel_data(channel_id))
+     
 
 
 # Define a function to retrieve channel Data from channel List
@@ -41,9 +44,20 @@ def channel_data(ch_id):
         'channel_subs':response['items'][0]['statistics']['subscriberCount']
     }
     return data
-
-if channel_id:
+    #ch_dt = channel_data(channel_id)
+    #df = pd.DataFrame(ch_dt)
+    #df = df.drop_duplicates(subset=['channel_id'])
+    #st.write("This channel name already exists:")
+    #st.write(df)
+    
+if channel_id and ins:
      st.write(channel_data(channel_id))
+
+
+#if channel_id:
+#    st.write("dataframe after removing duplicates:")
+#    st.write(df)
+#    st.write(channel_data(channel_id))
 
 
 # Define a function to retrieve video IDs from channel playlist
@@ -188,22 +202,26 @@ def create_table1():
 
 
 def channel_insert(B):   
-    sql = '''INSERT ignore INTO channel(channel_id,
-                            channel_name,
-                            channel_des,
-                            channel_pid,
-                            channel_pat,
-                            channel_videoc,
-                            channel_viewc,
-                            channel_subs
-                                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)'''
-          
-    mycursor.execute(sql, tuple(B.values()))
+    try:
+         
+        sql = '''INSERT INTO channel(channel_id,
+                                channel_name,
+                                channel_des,
+                                channel_pid,
+                                channel_pat,
+                                channel_videoc,
+                                channel_viewc,
+                                channel_subs
+                                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)'''
+            
+        mycursor.execute(sql, tuple(B.values()))
 
-    mydb.commit()
+        mydb.commit()
 
-    print(mycursor.rowcount, "record inserted.")
-
+        st.success('Data inserted successfully')
+        #print(mycursor.rowcount, "record inserted.")
+    except:
+         st.warning('channel_id already exist in SQL')
 
 # video table creation and insertion 
 
@@ -223,8 +241,9 @@ data = get_video_info(A)
 vi_ins = pd.DataFrame(data) 
 
 def video_insert(vi_ins):
+        try:    
             for index,row in vi_ins.iterrows():
-                sql = '''INSERT ignore INTO videos(video_id,
+                sql = '''INSERT INTO videos(video_id,
                                     channel_id,
                                     video_name,
                                     video_description,
@@ -251,7 +270,10 @@ def video_insert(vi_ins):
                            
             mycursor.execute(sql, val)
             mydb.commit()
+            #st.success('Video information inserted successfully')
             print(mycursor.rowcount, "record inserted.")
+        except:
+            st.warning('video_id already exist in SQL')
 
         
 # comment table creation and insertion
@@ -268,22 +290,27 @@ def create_table3():
 
 
 def comment_insert(cm_ins):
-        for index,row in cm_ins.iterrows():
-            sql = '''INSERT INTO comments (comment_id,
+        try:
+            for index,row in cm_ins.iterrows():
+                sql = '''INSERT INTO comments (comment_id,
                                     video_id,
                                     comment_text, 
                                     comment_author,  
                                     comment_published_date                                
                                      ) VALUES (%s,%s,%s,%s,%s)'''
-            val = (row["Comment_Id"],
+                val = (row["Comment_Id"],
                 row["Video_Id"],
                 row["Comment_Text"],
                 row["Comment_Author"],
                 row["Comment_Published"])
                            
-        mycursor.execute(sql, val)
-        mydb.commit()
-        print(mycursor.rowcount, "record inserted.")
+            mycursor.execute(sql, val)
+            mydb.commit()
+            #st.success('Comment information inserted successfully')
+            print(mycursor.rowcount, "record inserted.")
+        except:
+            st.warning('comment_id already exist in SQL')
+
 
 
 #To convert into streamlit:
@@ -343,7 +370,10 @@ def view_comment_table():
 
 if channel_id and ins:
     #B=channel_data(channel_id)
-    st.success("data insert successfully")
+    #st.success("Data Inserted Successfully")
+#elif(channel_id == channel_data(channel_id) and ins):
+#     st.warning("channel_Id already exist")
+# else:
     B=channel_data(channel_id)
     all_Video_Id=get_video_info(channel_id)
     data = get_video_info(A)
@@ -476,7 +506,7 @@ elif question_tosql == '4. How many comments were made on each video, and what a
 # Q5
 elif question_tosql == '5. Which videos have the highest number of likes, and what are their corresponding channel names?':
         cursor.execute(
-            "SELECT distinct channel_name, video_name, like_count FROM channel, videos where channel.channel_id = video.channel_id ORDER BY like_count DESC;")
+            "SELECT distinct channel_name, video_name, like_count FROM channel, videos where channel.channel_id = videos.channel_id ORDER BY like_count DESC;")
         df5 = pd.DataFrame(cursor.fetchall(), columns=['Channel Name', 'Video Name', 'Like count'])
         st.dataframe(df5)
  
